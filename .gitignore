@@ -1,0 +1,4 @@
+#Don't track contents of these folders
+data/
+src/pretrained/*
+src/saved_models/*
