@@ -2,3 +2,4 @@
 data/
 src/pretrained/*
 src/saved_models/*
+results/
