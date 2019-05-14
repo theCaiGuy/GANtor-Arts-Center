@@ -42,7 +42,7 @@ class GANTrainer(object):
         self.gpus = [int(ix) for ix in s_gpus]
         self.num_gpus = len(self.gpus)
         self.batch_size = cfg.TRAIN.BATCH_SIZE * self.num_gpus
-        torch.cuda.set_device(self.gpus[0])
+        #torch.cuda.set_device(self.gpus[0])
         cudnn.benchmark = True
 
     # ############# For training stageI GAN #############
@@ -219,9 +219,9 @@ class GANTrainer(object):
                     #self.summary_writer.add_summary(summary_KL, count)
 
                     # save the image result for each epoch
-                    print ('Epoch: ' + str(epoch) + ' iteration: ' + str(i))
-                    print ('D_loss: ' + str(errD.data.item()))
-                    print ('G_loss: ' + str(errG.data.item()))
+                    print ('Epoch: ' + str(epoch) + ' iteration: ' + str(i), flush=True)
+                    print ('D_loss: ' + str(errD.data.item()), flush=True)
+                    print ('G_loss: ' + str(errG.data.item()), flush=True)
                     inputs = (txt_embedding, fixed_noise)
                     lr_fake, fake = \
                         nn.parallel.data_parallel(netG, inputs, self.gpus)
