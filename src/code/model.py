@@ -139,6 +139,10 @@ class STAGE1_G(nn.Module):
 
     def forward(self, text_embedding, noise):
         #c_code, mu, logvar = self.ca_net(text_embedding)
+
+        print("TE: " + str(text_embedding.size()))
+        print("noise: " + str(noise.size()))
+
         z_c_code = torch.cat((noise, text_embedding), 1)
         h_code = self.fc(z_c_code)
 

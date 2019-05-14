@@ -1,7 +1,7 @@
 CONFIG_NAME: 'stageII'
 
 DATASET_NAME: 'wikiart'
-GPU_ID: '0,1'
+GPU_ID: '0,1,2,3,4,5,6,7'
 Z_DIM: 100
 STAGE1_G: '../output/wikiart_stageI/Model/netG_epoch_120.pth'
 DATA_DIR: '../../data/'
@@ -11,7 +11,7 @@ STAGE: 2
 TRAIN:
     FLAG: True
     BATCH_SIZE: 40
-    MAX_EPOCH: 100
+    MAX_EPOCH: 60
     LR_DECAY_EPOCH: 20
     SNAPSHOT_INTERVAL: 5
     DISCRIMINATOR_LR: 0.0002

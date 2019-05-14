@@ -120,9 +120,11 @@ class GANTrainer(object):
         nz = cfg.Z_DIM
         batch_size = self.batch_size
         noise = Variable(torch.FloatTensor(batch_size, nz))
-        fixed_noise = \
-            Variable(torch.FloatTensor(batch_size, nz).normal_(0, 1),
-                     volatile=True)
+
+        with torch.no_grad():
+            fixed_noise = \
+                Variable(torch.FloatTensor(batch_size, nz).normal_(0, 1))
+
         real_labels = Variable(torch.FloatTensor(batch_size).fill_(1))
         fake_labels = Variable(torch.FloatTensor(batch_size).fill_(0))
         if cfg.CUDA:
@@ -143,6 +145,9 @@ class GANTrainer(object):
                                 lr=cfg.TRAIN.GENERATOR_LR,
                                 betas=(0.5, 0.999))
         count = 0
+       
+        print("GPUs: " + str(self.gpus))
+
         for epoch in range(self.max_epoch):
             start_t = time.time()
             if epoch % lr_decay_step == 0 and epoch > 0:
@@ -157,6 +162,7 @@ class GANTrainer(object):
                 ######################################################
                 # (1) Prepare training data
                 ######################################################
+
                 real_img_cpu, txt_embedding = data #txt_embedding is actually context embedding vector
                 real_imgs = Variable(real_img_cpu)
                 txt_embedding = Variable(txt_embedding).float()
@@ -213,6 +219,9 @@ class GANTrainer(object):
                     #self.summary_writer.add_summary(summary_KL, count)
 
                     # save the image result for each epoch
+                    print ('Epoch: ' + str(epoch) + ' iteration: ' + str(i))
+                    print ('D_loss: ' + str(errD.data.item()))
+                    print ('G_loss: ' + str(errG.data.item()))
                     inputs = (txt_embedding, fixed_noise)
                     lr_fake, fake = \
                         nn.parallel.data_parallel(netG, inputs, self.gpus)

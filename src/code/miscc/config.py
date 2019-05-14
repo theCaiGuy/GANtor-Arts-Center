@@ -12,7 +12,7 @@ cfg = __C
 # Dataset name: flowers, birds
 __C.DATASET_NAME = 'wikiart'
 __C.CONFIG_NAME = ''
-__C.GPU_ID = '0'
+__C.GPU_ID = '0,1,2,3,4,5,6,7'
 __C.CUDA = True
 __C.WORKERS = 4
 
