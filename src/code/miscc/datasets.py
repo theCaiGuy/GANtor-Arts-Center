@@ -13,12 +13,13 @@ import pickle
 import random
 import numpy as np
 import pandas as pd
+import csv
 
 from miscc.config import cfg
 
 
 class TextDataset(data.Dataset):
-    def __init__(self, data_dir, split='train', embedding_type='cnn-rnn',
+    def __init__(self, data_dir, num_classes = 27, split='train', embedding_type='cnn-rnn',
                  imsize=64, transform=None, target_transform=None):
 
         self.transform = transform
@@ -32,6 +33,7 @@ class TextDataset(data.Dataset):
             self.bbox = None
         split_dir = os.path.join(data_dir, split)
 
+        self.num_classes = num_classes
         self.filenames, self.classes = self.load_wikiart_from_csv()
         # Filenames are paths to the image files as stored in the csv
         # classes are a numpy vector of indices corresponding to each class
@@ -43,12 +45,16 @@ class TextDataset(data.Dataset):
 
     def load_wikiart_from_csv(self, csv_path):
         """
-        filenames are paths to the image files as stored in the csv, stored in a numpy 
-        classes are a numpy vector of indices corresponding to each class
+        filenames is a list of file paths to the image files as stored in the csv, stored in a numpy 
+        classes are a list of indices corresponding to each class
         """
-        
-        
-        return 
+        filenames, classes = [], []
+        with open(csv_path) as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',')
+            for row in readCSV:
+                filenames.append(str(row[0])) 
+                classes.append(float(row[1]))
+        return filenames, classes
         
     def get_img(self, img_path, bbox):
         img = Image.open(img_path).convert('RGB')
@@ -156,16 +162,19 @@ class TextDataset(data.Dataset):
         # captions = self.captions[key]
         embeddings = self.embeddings[index, :, :]
         #img_name = '%s/images/%s.jpg' % (data_dir, key)
-        img_dir = '%swikiart/'(data_dir)
+        img_dir = data_dir + 'wikiart/'
         
         img_name = img_dir + key
         img = self.get_img(img_name, bbox)
 
-        embedding_ix = random.randint(0, embeddings.shape[0]-1)
-        embedding = embeddings[embedding_ix, :]
-        if self.target_transform is not None:
-            embedding = self.target_transform(embedding)
-        return img, embedding
+#         embedding_ix = random.randint(0, embeddings.shape[0]-1)
+#         embedding = embeddings[embedding_ix, :]
+#         if self.target_transform is not None:
+#             embedding = self.target_transform(embedding)
+        context_1hot = np.zeros(self.num_classes)
+        context_1hot[self.classes[index]] = 1.0
+
+        return img, context_1hot
 
     def __len__(self):
         return len(self.filenames)
