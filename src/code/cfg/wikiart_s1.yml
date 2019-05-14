@@ -1,10 +1,9 @@
 CONFIG_NAME: 'stageI'
 
-DATASET_NAME: 'coco'
-EMBEDDING_TYPE: 'cnn-rnn'
+DATASET_NAME: 'wikiart'
 GPU_ID: '0,1'
 Z_DIM: 100
-DATA_DIR: '../data/coco'
+DATA_DIR: '../../data/'
 IMSIZE: 64
 WORKERS: 4
 STAGE: 1
@@ -20,7 +19,7 @@ TRAIN:
       KL: 2.0
 
 GAN:
-    CONDITION_DIM: 128
+    CONDITION_DIM: 27
     DF_DIM: 96
     GF_DIM: 192
 
