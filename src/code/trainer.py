@@ -176,7 +176,7 @@ class GANTrainer(object):
                 # (3) Update D network
                 ###########################
                 netD.zero_grad()
-                errD, errD_real, errD_wrong, errD_fake = compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, text_embedding, self.gpus)
+                errD, errD_real, errD_wrong, errD_fake = compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, txt_embedding, self.gpus)
 #                     compute_discriminator_loss(netD, real_imgs, fake_imgs,
 #                                                real_labels, fake_labels,
 #                                                mu, self.gpus)
@@ -189,7 +189,7 @@ class GANTrainer(object):
                 netG.zero_grad()
 #                 errG = compute_generator_loss(netD, fake_imgs,
 #                                               real_labels, mu, self.gpus)
-                errG = compute_generator_loss(netD, fake_imgs, real_labels, self.gpus)
+                errG = compute_generator_loss(netD, fake_imgs, real_labels, txt_embedding, self.gpus)
 #                 kl_loss = KL_loss(mu, logvar)
                 kl_loss = 0.0
                 errG_total = errG + kl_loss * cfg.TRAIN.COEFF.KL
@@ -198,23 +198,23 @@ class GANTrainer(object):
 
                 count = count + 1
                 if i % 100 == 0:
-                    summary_D = summary.scalar('D_loss', errD.data[0])
-                    summary_D_r = summary.scalar('D_loss_real', errD_real)
-                    summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
-                    summary_D_f = summary.scalar('D_loss_fake', errD_fake)
-                    summary_G = summary.scalar('G_loss', errG.data[0])
-                    summary_KL = summary.scalar('KL_loss', kl_loss.data[0])
+                    #summary_D = summary.scalar('D_loss', errD.data.item())
+                    #summary_D_r = summary.scalar('D_loss_real', errD_real)
+                    #summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
+                    #summary_D_f = summary.scalar('D_loss_fake', errD_fake)
+                    #summary_G = summary.scalar('G_loss', errG.data.item())
+                    #summary_KL = summary.scalar('KL_loss', kl_loss)
 
-                    self.summary_writer.add_summary(summary_D, count)
-                    self.summary_writer.add_summary(summary_D_r, count)
-                    self.summary_writer.add_summary(summary_D_w, count)
-                    self.summary_writer.add_summary(summary_D_f, count)
-                    self.summary_writer.add_summary(summary_G, count)
-                    self.summary_writer.add_summary(summary_KL, count)
+                    #self.summary_writer.add_summary(summary_D, count)
+                    #self.summary_writer.add_summary(summary_D_r, count)
+                    #self.summary_writer.add_summary(summary_D_w, count)
+                    #self.summary_writer.add_summary(summary_D_f, count)
+                    #self.summary_writer.add_summary(summary_G, count)
+                    #self.summary_writer.add_summary(summary_KL, count)
 
                     # save the image result for each epoch
                     inputs = (txt_embedding, fixed_noise)
-                    lr_fake, fake, _, _ = \
+                    lr_fake, fake = \
                         nn.parallel.data_parallel(netG, inputs, self.gpus)
                     save_img_results(real_img_cpu, fake, epoch, self.image_dir)
                     if lr_fake is not None:
@@ -225,7 +225,7 @@ class GANTrainer(object):
                      Total Time: %.2fsec
                   '''
                   % (epoch, self.max_epoch, i, len(data_loader),
-                     errD.data[0], errG.data[0], kl_loss.data[0],
+                     errD.data.item(), errG.data.item(),
                      errD_real, errD_wrong, errD_fake, (end_t - start_t)))
             if epoch % self.snapshot_interval == 0:
                 save_model(netG, netD, epoch, self.model_dir)
