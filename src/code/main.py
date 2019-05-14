@@ -33,10 +33,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-if __name__ == "__main__":
-    
-    print(dir_path)
-    
+if __name__ == "__main__":    
     args = parse_args()
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
