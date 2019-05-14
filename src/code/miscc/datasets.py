@@ -32,11 +32,24 @@ class TextDataset(data.Dataset):
             self.bbox = None
         split_dir = os.path.join(data_dir, split)
 
-        self.filenames = self.load_filenames(split_dir)
+        self.filenames, self.classes = self.load_wikiart_from_csv()
+        # Filenames are paths to the image files as stored in the csv
+        # classes are a numpy vector of indices corresponding to each class
+        
+#         self.filenames = self.load_filenames(split_dir)
 #         self.embeddings = self.load_embedding(split_dir, embedding_type)
 #         self.class_id = self.load_class_id(split_dir, len(self.filenames))
         # self.captions = self.load_all_captions()
 
+    def load_wikiart_from_csv(self, csv_path):
+        """
+        filenames are paths to the image files as stored in the csv, stored in a numpy 
+        classes are a numpy vector of indices corresponding to each class
+        """
+        
+        
+        return 
+        
     def get_img(self, img_path, bbox):
         img = Image.open(img_path).convert('RGB')
         width, height = img.size
@@ -96,18 +109,22 @@ class TextDataset(data.Dataset):
         return captions
 
     def load_embedding(self, data_dir, embedding_type):
-        if embedding_type == 'cnn-rnn':
-            embedding_filename = '/char-CNN-RNN-embeddings.pickle'
-        elif embedding_type == 'cnn-gru':
-            embedding_filename = '/char-CNN-GRU-embeddings.pickle'
-        elif embedding_type == 'skip-thought':
-            embedding_filename = '/skip-thought-embeddings.pickle'
+#         if embedding_type == 'cnn-rnn':
+#             embedding_filename = '/char-CNN-RNN-embeddings.pickle'
+#         elif embedding_type == 'cnn-gru':
+#             embedding_filename = '/char-CNN-GRU-embeddings.pickle'
+#         elif embedding_type == 'skip-thought':
+#             embedding_filename = '/skip-thought-embeddings.pickle'
 
-        with open(data_dir + embedding_filename, 'rb') as f:
-            embeddings = pickle.load(f)
-            embeddings = np.array(embeddings)
-            # embedding_shape = [embeddings.shape[-1]]
-            print('embeddings: ', embeddings.shape)
+#         with open(data_dir + embedding_filename, 'rb') as f:
+#             embeddings = pickle.load(f)
+#             embeddings = np.array(embeddings)
+#             # embedding_shape = [embeddings.shape[-1]]
+#             print('embeddings: ', embeddings.shape)
+        
+        #Return one-hot vector for conditioning on single style
+        
+        
         return embeddings
 
     def load_class_id(self, data_dir, total_num):
@@ -138,7 +155,10 @@ class TextDataset(data.Dataset):
 
         # captions = self.captions[key]
         embeddings = self.embeddings[index, :, :]
-        img_name = '%s/images/%s.jpg' % (data_dir, key)
+        #img_name = '%s/images/%s.jpg' % (data_dir, key)
+        img_dir = '%swikiart/'(data_dir)
+        
+        img_name = img_dir + key
         img = self.get_img(img_name, bbox)
 
         embedding_ix = random.randint(0, embeddings.shape[0]-1)

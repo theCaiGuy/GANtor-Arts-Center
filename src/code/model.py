@@ -116,7 +116,7 @@ class STAGE1_G(nn.Module):
         ninput = self.z_dim + self.ef_dim
         ngf = self.gf_dim
         # TEXT.DIMENSION -> GAN.CONDITION_DIM
-        self.ca_net = CA_NET()
+#         self.ca_net = CA_NET()
 
         # -> ngf x 4 x 4
         self.fc = nn.Sequential(
