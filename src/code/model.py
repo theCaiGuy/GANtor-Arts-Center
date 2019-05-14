@@ -140,8 +140,6 @@ class STAGE1_G(nn.Module):
     def forward(self, text_embedding, noise):
         #c_code, mu, logvar = self.ca_net(text_embedding)
 
-        print("TE: " + str(text_embedding.size()))
-        print("noise: " + str(noise.size()))
 
         z_c_code = torch.cat((noise, text_embedding), 1)
         h_code = self.fc(z_c_code)
@@ -214,7 +212,7 @@ class STAGE2_G(nn.Module):
     def define_module(self):
         ngf = self.gf_dim
         # TEXT.DIMENSION -> GAN.CONDITION_DIM
-        self.ca_net = CA_NET()
+        #self.ca_net = CA_NET()
         # --> 4ngf x 16 x 16
         self.encoder = nn.Sequential(
             conv3x3(3, ngf),

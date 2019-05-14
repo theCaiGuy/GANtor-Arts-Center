@@ -1,7 +1,7 @@
 CONFIG_NAME: 'stageI'
 
 DATASET_NAME: 'wikiart'
-GPU_ID: '0,1,2,3,4,5,6,7'
+GPU_ID: '0,1'
 Z_DIM: 100
 DATA_DIR: '../../data/'
 IMSIZE: 64

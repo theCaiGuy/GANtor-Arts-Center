@@ -55,7 +55,7 @@ if __name__ == "__main__":
                  (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp)
 
     print (cfg.GPU_ID)
-    num_gpu = len(cfg.GPU_ID)
+    num_gpu = len(cfg.GPU_ID.split(','))
     #num_gpu = 8
     print(num_gpu)
 
