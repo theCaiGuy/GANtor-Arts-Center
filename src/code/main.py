@@ -51,7 +51,7 @@ if __name__ == "__main__":
         torch.cuda.manual_seed_all(args.manualSeed)
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
-    output_dir = '../output/%s_%s_%s' % \
+    output_dir = '../../results/%s_%s_%s' % \
                  (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp)
 
     num_gpu = len(cfg.GPU_ID.split(','))
