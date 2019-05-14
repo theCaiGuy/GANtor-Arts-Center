@@ -10,17 +10,16 @@ __C = edict()
 cfg = __C
 
 # Dataset name: flowers, birds
-__C.DATASET_NAME = 'birds'
-__C.EMBEDDING_TYPE = 'cnn-rnn'
+__C.DATASET_NAME = 'wikiart'
 __C.CONFIG_NAME = ''
 __C.GPU_ID = '0'
 __C.CUDA = True
-__C.WORKERS = 6
+__C.WORKERS = 4
 
 __C.NET_G = ''
 __C.NET_D = ''
 __C.STAGE1_G = ''
-__C.DATA_DIR = ''
+__C.DATA_DIR = '../../data/'
 __C.VIS_COUNT = 64
 
 __C.Z_DIM = 100
@@ -45,7 +44,7 @@ __C.TRAIN.COEFF.KL = 2.0
 
 # Modal options
 __C.GAN = edict()
-__C.GAN.CONDITION_DIM = 128
+__C.GAN.CONDITION_DIM = 27
 __C.GAN.DF_DIM = 64
 __C.GAN.GF_DIM = 128
 __C.GAN.R_NUM = 4

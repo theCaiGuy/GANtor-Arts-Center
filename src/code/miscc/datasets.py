@@ -19,7 +19,7 @@ from miscc.config import cfg
 
 
 class TextDataset(data.Dataset):
-    def __init__(self, data_dir, num_classes = 27, csv_file = "style_train.csv",
+    def __init__(self, data_dir, num_classes = 27, csv_file = 'style_train.csv',
                  split='train', embedding_type='cnn-rnn',
                  imsize=64, transform=None, target_transform=None):
 
@@ -32,7 +32,7 @@ class TextDataset(data.Dataset):
             self.bbox = self.load_bbox()
         else:
             self.bbox = None
-        split_dir = os.path.join(data_dir, split)
+#         split_dir = os.path.join(data_dir, split)
 
         self.num_classes = num_classes
         self.filenames, self.classes = self.load_wikiart_from_csv(data_dir + csv_file)
@@ -54,7 +54,7 @@ class TextDataset(data.Dataset):
             readCSV = csv.reader(csvfile, delimiter=',')
             for row in readCSV:
                 filenames.append(str(row[0])) 
-                classes.append(float(row[1]))
+                classes.append(int(row[1]))
         return filenames, classes
         
     def get_img(self, img_path, bbox):
@@ -161,7 +161,7 @@ class TextDataset(data.Dataset):
             data_dir = self.data_dir
 
         # captions = self.captions[key]
-        embeddings = self.embeddings[index, :, :]
+#        embeddings = self.embeddings[index, :, :]
         #img_name = '%s/images/%s.jpg' % (data_dir, key)
         img_dir = data_dir + 'wikiart/'
         
