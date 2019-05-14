@@ -175,7 +175,7 @@ class TextDataset(data.Dataset):
         context_1hot = np.zeros(self.num_classes)
         context_1hot[self.classes[index]] = 1.0
 
-        return img, context_1hot
+        return img, context_1hot.astype(float)
 
     def __len__(self):
         return len(self.filenames)

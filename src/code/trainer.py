@@ -159,7 +159,7 @@ class GANTrainer(object):
                 ######################################################
                 real_img_cpu, txt_embedding = data #txt_embedding is actually context embedding vector
                 real_imgs = Variable(real_img_cpu)
-                txt_embedding = Variable(txt_embedding)
+                txt_embedding = Variable(txt_embedding).float()
                 if cfg.CUDA:
                     real_imgs = real_imgs.cuda()
                     txt_embedding = txt_embedding.cuda()
@@ -176,13 +176,12 @@ class GANTrainer(object):
                 # (3) Update D network
                 ###########################
                 netD.zero_grad()
-                errD, errD_real, errD_wrong, errD_fake = \
+                errD, errD_real, errD_wrong, errD_fake = compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, text_embedding, self.gpus)
 #                     compute_discriminator_loss(netD, real_imgs, fake_imgs,
 #                                                real_labels, fake_labels,
 #                                                mu, self.gpus)
-                    compute_discriminator_loss(netD, real_imgs, fake_imgs,
-                                               real_labels, fake_labels,
-                                               self.gpus)                errD.backward()
+                # compute_discriminator_loss(netD, real_imgs, fake_imgs,real_labels, fake_labels,self.gpus)
+                errD.backward()
                 optimizerD.step()
                 ############################
                 # (2) Update G network
@@ -190,8 +189,7 @@ class GANTrainer(object):
                 netG.zero_grad()
 #                 errG = compute_generator_loss(netD, fake_imgs,
 #                                               real_labels, mu, self.gpus)
-                errG = compute_generator_loss(netD, fake_imgs,
-                              real_labels, self.gpus)
+                errG = compute_generator_loss(netD, fake_imgs, real_labels, self.gpus)
 #                 kl_loss = KL_loss(mu, logvar)
                 kl_loss = 0.0
                 errG_total = errG + kl_loss * cfg.TRAIN.COEFF.KL
