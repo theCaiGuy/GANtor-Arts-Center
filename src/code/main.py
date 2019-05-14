@@ -26,7 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a GAN network')
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file',
-                        default='birds_stage1.yml', type=str)
+                        default='./cfg/wikiart_s1.yml', type=str)
     parser.add_argument('--gpu',  dest='gpu_id', type=str, default='0')
     parser.add_argument('--data_dir', dest='data_dir', type=str, default='')
     parser.add_argument('--manualSeed', type=int, help='manual seed')
@@ -61,9 +61,9 @@ if __name__ == "__main__":
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        dataset = TextDataset(cfg.DATA_DIR, 'train',
-                              imsize=cfg.IMSIZE,
-                              transform=image_transform)
+        dataset = TextDataset(cfg.DATA_DIR, split='train',
+                      imsize=cfg.IMSIZE,
+                      transform=image_transform)
         assert dataset
         dataloader = torch.utils.data.DataLoader(
             dataset, batch_size=cfg.TRAIN.BATCH_SIZE * num_gpu,
