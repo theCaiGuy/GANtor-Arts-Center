@@ -19,7 +19,8 @@ from miscc.config import cfg
 
 
 class TextDataset(data.Dataset):
-    def __init__(self, data_dir, num_classes = 27, split='train', embedding_type='cnn-rnn',
+    def __init__(self, data_dir, num_classes = 27, csv_file = "style_train.csv",
+                 split='train', embedding_type='cnn-rnn',
                  imsize=64, transform=None, target_transform=None):
 
         self.transform = transform
@@ -34,7 +35,7 @@ class TextDataset(data.Dataset):
         split_dir = os.path.join(data_dir, split)
 
         self.num_classes = num_classes
-        self.filenames, self.classes = self.load_wikiart_from_csv()
+        self.filenames, self.classes = self.load_wikiart_from_csv(data_dir + csv_file)
         # Filenames are paths to the image files as stored in the csv
         # classes are a numpy vector of indices corresponding to each class
         
