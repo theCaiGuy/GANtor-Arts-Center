@@ -157,7 +157,7 @@ class GANTrainer(object):
                 ######################################################
                 # (1) Prepare training data
                 ######################################################
-                real_img_cpu, txt_embedding = data
+                real_img_cpu, txt_embedding = data #txt_embedding is actually context embedding vector
                 real_imgs = Variable(real_img_cpu)
                 txt_embedding = Variable(txt_embedding)
                 if cfg.CUDA:
@@ -169,7 +169,7 @@ class GANTrainer(object):
                 ######################################################
                 noise.data.normal_(0, 1)
                 inputs = (txt_embedding, noise)
-                _, fake_imgs, mu, logvar = \
+                _, fake_imgs = \
                     nn.parallel.data_parallel(netG, inputs, self.gpus)
 
                 ############################
@@ -177,18 +177,23 @@ class GANTrainer(object):
                 ###########################
                 netD.zero_grad()
                 errD, errD_real, errD_wrong, errD_fake = \
+#                     compute_discriminator_loss(netD, real_imgs, fake_imgs,
+#                                                real_labels, fake_labels,
+#                                                mu, self.gpus)
                     compute_discriminator_loss(netD, real_imgs, fake_imgs,
                                                real_labels, fake_labels,
-                                               mu, self.gpus)
-                errD.backward()
+                                               self.gpus)                errD.backward()
                 optimizerD.step()
                 ############################
                 # (2) Update G network
                 ###########################
                 netG.zero_grad()
+#                 errG = compute_generator_loss(netD, fake_imgs,
+#                                               real_labels, mu, self.gpus)
                 errG = compute_generator_loss(netD, fake_imgs,
-                                              real_labels, mu, self.gpus)
-                kl_loss = KL_loss(mu, logvar)
+                              real_labels, self.gpus)
+#                 kl_loss = KL_loss(mu, logvar)
+                kl_loss = 0.0
                 errG_total = errG + kl_loss * cfg.TRAIN.COEFF.KL
                 errG_total.backward()
                 optimizerG.step()
@@ -274,7 +279,9 @@ class GANTrainer(object):
             ######################################################
             noise.data.normal_(0, 1)
             inputs = (txt_embedding, noise)
-            _, fake_imgs, mu, logvar = \
+#             _, fake_imgs, mu, logvar = \
+#                 nn.parallel.data_parallel(netG, inputs, self.gpus)
+            _, fake_imgs = \
                 nn.parallel.data_parallel(netG, inputs, self.gpus)
             for i in range(batch_size):
                 save_name = '%s/%d.png' % (save_dir, count + i)

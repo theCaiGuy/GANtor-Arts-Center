@@ -138,8 +138,8 @@ class STAGE1_G(nn.Module):
             nn.Tanh())
 
     def forward(self, text_embedding, noise):
-        c_code, mu, logvar = self.ca_net(text_embedding)
-        z_c_code = torch.cat((noise, c_code), 1)
+        #c_code, mu, logvar = self.ca_net(text_embedding)
+        z_c_code = torch.cat((noise, text_embedding), 1)
         h_code = self.fc(z_c_code)
 
         h_code = h_code.view(-1, self.gf_dim, 4, 4)
@@ -149,8 +149,8 @@ class STAGE1_G(nn.Module):
         h_code = self.upsample4(h_code)
         # state size 3 x 64 x 64
         fake_img = self.img(h_code)
-        return None, fake_img, mu, logvar
-
+        #return None, fake_img, mu, logvar
+        return None, fake_img
 
 class STAGE1_D(nn.Module):
     def __init__(self):
@@ -244,7 +244,8 @@ class STAGE2_G(nn.Module):
         stage1_img = stage1_img.detach()
         encoded_img = self.encoder(stage1_img)
 
-        c_code, mu, logvar = self.ca_net(text_embedding)
+        #c_code, mu, logvar = self.ca_net(text_embedding)
+        c_code = text_embedding
         c_code = c_code.view(-1, self.ef_dim, 1, 1)
         c_code = c_code.repeat(1, 1, 16, 16)
         i_c_code = torch.cat([encoded_img, c_code], 1)
@@ -257,7 +258,8 @@ class STAGE2_G(nn.Module):
         h_code = self.upsample4(h_code)
 
         fake_img = self.img(h_code)
-        return stage1_img, fake_img, mu, logvar
+#         return stage1_img, fake_img, mu, logvar
+        return stage1_img, fake_img
 
 
 class STAGE2_D(nn.Module):
