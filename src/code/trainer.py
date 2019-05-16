@@ -148,7 +148,7 @@ class GANTrainer(object):
        
         print("GPUs: " + str(self.gpus))
 
-        for epoch in range(21, self.max_epoch):
+        for epoch in range(self.max_epoch):
             start_t = time.time()
             if epoch % lr_decay_step == 0 and epoch > 0:
                 generator_lr *= 0.5

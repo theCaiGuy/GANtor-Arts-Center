@@ -242,7 +242,7 @@ class STAGE2_G(nn.Module):
             nn.Tanh())
 
     def forward(self, text_embedding, noise):
-        _, stage1_img, _, _ = self.STAGE1_G(text_embedding, noise)
+        _, stage1_img = self.STAGE1_G(text_embedding, noise)
         stage1_img = stage1_img.detach()
         encoded_img = self.encoder(stage1_img)
 
