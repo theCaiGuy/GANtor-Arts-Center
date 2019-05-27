@@ -44,7 +44,7 @@ __C.TRAIN.COEFF.KL = 2.0
 
 # Modal options
 __C.GAN = edict()
-__C.GAN.CONDITION_DIM = 27
+__C.GAN.CONDITION_DIM = 10
 __C.GAN.DF_DIM = 64
 __C.GAN.GF_DIM = 128
 __C.GAN.R_NUM = 4

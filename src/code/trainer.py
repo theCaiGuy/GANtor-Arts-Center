@@ -203,7 +203,7 @@ class GANTrainer(object):
                 optimizerG.step()
 
                 count = count + 1
-                if i % 100 == 0:
+                if i % 50 == 0:
                     #summary_D = summary.scalar('D_loss', errD.data.item())
                     #summary_D_r = summary.scalar('D_loss_real', errD_real)
                     #summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
