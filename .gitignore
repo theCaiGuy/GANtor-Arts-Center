@@ -3,3 +3,6 @@ data/
 src/pretrained/*
 src/saved_models/*
 results/
+src/code/inception/ft_wikiart/
+src/code/inception/baseline_generated/
+__pycache__/

@@ -45,10 +45,10 @@ tf.app.flags.DEFINE_string('checkpoint_dir',
                            """Path where to read model checkpoints.""")
 
 tf.app.flags.DEFINE_string('image_folder', 
-							'/Users/han/Documents/CUB_200_2011/CUB_200_2011/images',
+							'data/wikiart/High_Renaissance/',
 							"""Path where to load the images """)
 
-tf.app.flags.DEFINE_integer('num_classes', 50,      # 20 for flowers
+tf.app.flags.DEFINE_integer('num_classes', 27,      # 20 for flowers
                             """Number of classes """)
 tf.app.flags.DEFINE_integer('splits', 10,
                             """Number of splits """)
