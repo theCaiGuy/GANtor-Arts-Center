@@ -1,0 +1,7 @@
+#Don't track contents of these folders
+pretrained/*
+output/*
+saved_models/*
+code/inception/ft_wikiart/
+code/inception/baseline_generated/
+__pycache__/
