@@ -154,6 +154,10 @@ class STAGE1_G(nn.Module):
         #return None, fake_img, mu, logvar
         return None, fake_img
 
+def gaussnoise(inp, std):
+    noise = Variable(inp.data.new(inp.size()).normal_(0, std))
+    return ins + noise
+    
 class STAGE1_D(nn.Module):
     def __init__(self):
         super(STAGE1_D, self).__init__()
@@ -163,31 +167,124 @@ class STAGE1_D(nn.Module):
 
     def define_module(self):
         ndf, nef = self.df_dim, self.ef_dim
-        self.encode_img = nn.Sequential(
-            nn.Conv2d(3, ndf, 4, 2, 1, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 32 x 32
-            nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 2),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size (ndf*2) x 16 x 16
-            nn.Conv2d(ndf*2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size (ndf*4) x 8 x 8
-            nn.Conv2d(ndf*4, ndf * 8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 8),
-            # state size (ndf * 8) x 4 x 4)
-            nn.LeakyReLU(0.2, inplace=True)
+        self.encoder = nn.Sequential(
+            # 64
+            nn.Conv2d(3, 128, 3, stride=2),
+            nn.LeakyReLU(0.2),
+            # 32
+            nn.Dropout(p = 0.5),
+            nn.Conv2d(128, 256, 3, stride=2),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
+            # 16
+            nn.Dropout(p = 0.5),
+            nn.Conv2d(256, 512, 3, stride=2),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            # 8
+            nn.Conv2d(512, 512, 3, stride=1),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.5),
+            nn.Conv2d(512, 1024, 3, stride=2),
+            nn.BatchNorm2d(1024),
+            nn.LeakyReLU(0.2)
+            # 4
         )
+        # 64
+#         inp = gaussnoise(inp, std=0.05)
+#         conv1 = conv2d(inp, 128, kernel=3, strides=2, name=dname + 'conv1')
+#         conv1 = lrelu(conv1, 0.2)
+#         # 32
+#         conv2 = tf.nn.dropout(conv1, keep_prob)
+#         conv2 = conv2d(conv2, 256, kernel=3, strides=2, name=dname + 'conv2')
+#         conv2 = batchnorm(conv2, is_training=is_train, name=dname + 'bn2')
+#         conv2 = lrelu(conv2, 0.2)
+#         # 16
+#         conv3 = tf.nn.dropout(conv2, keep_prob)
+#         conv3 = conv2d(conv3, 512, kernel=3, strides=2, name=dname + 'conv3')
+#         conv3 = batchnorm(conv3, is_training=is_train, name=dname + 'bn3')
+#         conv3 = lrelu(conv3, 0.2)
+#         # 8
+#         conv3b = conv2d(conv3, 512, kernel=3, strides=1, name=dname + 'conv3b')
+#         conv3b = batchnorm(conv3b, is_training=is_train, name=dname + 'bn3b')
+#         conv3b = lrelu(conv3b, 0.2)
 
-        self.get_cond_logits = D_GET_LOGITS(ndf, nef)
-        self.get_uncond_logits = None
+#         conv4 = tf.nn.dropout(conv3b, keep_prob)
+#         conv4 = conv2d(conv4, 1024, kernel=3, strides=2, name=dname + 'conv4')
+#         conv4 = batchnorm(conv4, is_training=is_train, name=dname + 'bn4')
+#         conv4 = lrelu(conv4, 0.2)
+#         # 4
+
+#         flat = flatten(conv4)
+#         # Classifier
+#         clspred = linear(flat, n_classes, name=dname + 'cpred')
+        self.clspred = nn.Linear(4 * 4 * 1024, nef)
+    
+        self.decoder = nn.Sequential(
+            nn.Conv2d(1024, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 8x8
+            nn.Conv2d(512, 256, 3),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 16x16
+            nn.Conv2d(256, 128, 3),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 32x32
+            nn.Conv2d(128, 64, 3),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 64x64
+            nn.Conv2d(64, 32, 3),
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(64, 3, 3),
+            nn.Tanh()
+        )
+#         # Decoder
+#         g1 = conv2d(conv4, nout=512, kernel=3, name=dname + 'deconv1')
+#         g1 = batchnorm(g1, is_training=tf.constant(True), name=dname + 'bn1g')
+#         g1 = lrelu(g1, 0.2)
+
+#         g2 = nnupsampling(g1, [8, 8])
+#         g2 = conv2d(g2, nout=256, kernel=3, name=dname + 'deconv2')
+#         g2 = batchnorm(g2, is_training=tf.constant(True), name=dname + 'bn2g')
+#         g2 = lrelu(g2, 0.2)
+
+#         g3 = nnupsampling(g2, [16, 16])
+#         g3 = conv2d(g3, nout=128, kernel=3, name=dname + 'deconv3')
+#         g3 = batchnorm(g3, is_training=tf.constant(True), name=dname + 'bn3g')
+#         g3 = lrelu(g3, 0.2)
+
+#         g4 = nnupsampling(g3, [32, 32])
+#         g4 = conv2d(g4, nout=64, kernel=3, name=dname + 'deconv4')
+#         g4 = batchnorm(g4, is_training=tf.constant(True), name=dname + 'bn4g')
+#         g4 = lrelu(g4, 0.2)
+
+#         g5 = nnupsampling(g4, [64, 64])
+#         g5 = conv2d(g5, nout=32, kernel=3, name=dname + 'deconv5')
+#         g5 = batchnorm(g5, is_training=tf.constant(True), name=dname + 'bn5g')
+#         g5 = lrelu(g5, 0.2)
+
+#         g5b = conv2d(g5, nout=3, kernel=3, name=dname + 'deconv5b')
+#         g5b = tf.nn.tanh(g5b)
+#         return clspred, g5b
 
     def forward(self, image):
-        img_embedding = self.encode_img(image)
+#         img_embedding = self.encode_img(image)
+        print("Encoding")
+        img_embedding = self.encoder(image)
+        print("Encoded!")
+        clspred = self.clspred(img_embedding.view(img_embedding.size(0), -1)
+        print("clspred: " + str(clspred))
+        print("Decoding")
+        decoded_embedding = self.decoder(img_embedding)
+        print("Decoded!")
 
-        return img_embedding
+        return clspred, decoded_embedding
 
 
 # ############# Networks for stageII GAN #############
