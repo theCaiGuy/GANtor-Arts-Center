@@ -173,20 +173,22 @@ class STAGE1_D(nn.Module):
         ndf, nef = self.df_dim, self.ef_dim
         self.encoder = nn.Sequential(
             # 64
-            nn.Conv2d(3, 128, 3, stride=2),
+#             nn.Conv2d(3, 128, 3, stride=2),
+            nn.Conv2d(3, 128, 3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
             # 32
             nn.Dropout(p = 0.5),
-            nn.Conv2d(128, 256, 3, stride=2),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.2),
             # 16
             nn.Dropout(p = 0.5),
-            nn.Conv2d(256, 512, 3, stride=2),
+            nn.Conv2d(256, 512, 3, stride=2, padding=1),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2),
             # 8
             nn.Conv2d(512, 512, 3, stride=1),
+            #6
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2),
             nn.Dropout(0.5),
@@ -223,29 +225,40 @@ class STAGE1_D(nn.Module):
 #         flat = flatten(conv4)
 #         # Classifier
 #         clspred = linear(flat, n_classes, name=dname + 'cpred')
-        self.clspred = nn.Linear(4 * 1024, nef)
+        self.clspred = nn.Linear(4 * 4 * 1024, nef)
     
         self.decoder = nn.Sequential(
-            nn.Conv2d(1024, 512, 3),
+            #4
+            nn.Conv2d(1024, 512, 3, padding=1),
+            #4
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2),
             nn.Upsample(scale_factor=2, mode='nearest'), # 8x8
-            nn.Conv2d(512, 256, 3),
+            #8
+            nn.Conv2d(512, 256, 3, padding=1),
+            #8
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.2),
             nn.Upsample(scale_factor=2, mode='nearest'), # 16x16
-            nn.Conv2d(256, 128, 3),
+            #16
+            nn.Conv2d(256, 128, 3, padding=1),
+            #16
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2),
             nn.Upsample(scale_factor=2, mode='nearest'), # 32x32
-            nn.Conv2d(128, 64, 3),
+            #32
+            nn.Conv2d(128, 64, 3, padding=1),
+            #32
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2),
             nn.Upsample(scale_factor=2, mode='nearest'), # 64x64
-            nn.Conv2d(64, 32, 3),
+            #64
+            nn.Conv2d(64, 32, 3, padding=1),
+            #64
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2),
-            nn.Conv2d(64, 3, 3),
+            nn.Conv2d(32, 3, 3, padding=1),
+            #64
             nn.Tanh()
         )
 #         # Decoder
@@ -285,12 +298,15 @@ class STAGE1_D(nn.Module):
         print("Encoded!")
         print(img_embedding.size())
         print(flatten(img_embedding).size())
+        
         clspred = self.clspred(flatten(img_embedding))
         print("clspred: " + str(clspred))
+        
         print("Decoding")
         decoded_embedding = self.decoder(img_embedding)
         print("Decoded!")
 
+        print(clspred.size(), decoded_embedding.size())
         return clspred, decoded_embedding
 
 
