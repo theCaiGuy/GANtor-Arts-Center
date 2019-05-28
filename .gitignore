@@ -1,6 +1,7 @@
 #Don't track contents of these folders
 data/
 src/pretrained/*
+src/output/*
 src/saved_models/*
 results/
 src/code/inception/ft_wikiart/
