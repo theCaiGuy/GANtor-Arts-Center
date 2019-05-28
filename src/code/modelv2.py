@@ -17,7 +17,7 @@ def upBlock(in_planes, out_planes):
         nn.Upsample(scale_factor=2, mode='nearest'),
         conv3x3(in_planes, out_planes),
         nn.BatchNorm2d(out_planes),
-        nn.ReLU(True))
+        nn.LeakyReLU(0.2)
     return block
 
 
