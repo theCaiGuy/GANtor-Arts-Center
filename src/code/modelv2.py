@@ -156,7 +156,11 @@ class STAGE1_G(nn.Module):
 
 def gaussnoise(inp, std):
     noise = Variable(inp.data.new(inp.size()).normal_(0, std))
-    return ins + noise
+    return inp + noise
+
+def flatten(t):
+    t = t.reshape(t.size(0), -1)
+    return t
     
 class STAGE1_D(nn.Module):
     def __init__(self):
@@ -186,7 +190,7 @@ class STAGE1_D(nn.Module):
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2),
             nn.Dropout(0.5),
-            nn.Conv2d(512, 1024, 3, stride=2),
+            nn.Conv2d(512, 1024, 3, stride=1),
             nn.BatchNorm2d(1024),
             nn.LeakyReLU(0.2)
             # 4
@@ -219,7 +223,7 @@ class STAGE1_D(nn.Module):
 #         flat = flatten(conv4)
 #         # Classifier
 #         clspred = linear(flat, n_classes, name=dname + 'cpred')
-        self.clspred = nn.Linear(4 * 4 * 1024, nef)
+        self.clspred = nn.Linear(4 * 1024, nef)
     
         self.decoder = nn.Sequential(
             nn.Conv2d(1024, 512, 3),
@@ -275,10 +279,13 @@ class STAGE1_D(nn.Module):
 
     def forward(self, image):
 #         img_embedding = self.encode_img(image)
+        print(image.size())
         print("Encoding")
-        img_embedding = self.encoder(image)
+        img_embedding = self.encoder(gaussnoise(image, 0.05))
         print("Encoded!")
-        clspred = self.clspred(img_embedding.view(img_embedding.size(0), -1)
+        print(img_embedding.size())
+        print(flatten(img_embedding).size())
+        clspred = self.clspred(flatten(img_embedding))
         print("clspred: " + str(clspred))
         print("Decoding")
         decoded_embedding = self.decoder(img_embedding)
