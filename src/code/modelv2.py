@@ -198,33 +198,7 @@ class STAGE1_D(nn.Module):
             # 4
         )
         # 64
-#         inp = gaussnoise(inp, std=0.05)
-#         conv1 = conv2d(inp, 128, kernel=3, strides=2, name=dname + 'conv1')
-#         conv1 = lrelu(conv1, 0.2)
-#         # 32
-#         conv2 = tf.nn.dropout(conv1, keep_prob)
-#         conv2 = conv2d(conv2, 256, kernel=3, strides=2, name=dname + 'conv2')
-#         conv2 = batchnorm(conv2, is_training=is_train, name=dname + 'bn2')
-#         conv2 = lrelu(conv2, 0.2)
-#         # 16
-#         conv3 = tf.nn.dropout(conv2, keep_prob)
-#         conv3 = conv2d(conv3, 512, kernel=3, strides=2, name=dname + 'conv3')
-#         conv3 = batchnorm(conv3, is_training=is_train, name=dname + 'bn3')
-#         conv3 = lrelu(conv3, 0.2)
-#         # 8
-#         conv3b = conv2d(conv3, 512, kernel=3, strides=1, name=dname + 'conv3b')
-#         conv3b = batchnorm(conv3b, is_training=is_train, name=dname + 'bn3b')
-#         conv3b = lrelu(conv3b, 0.2)
 
-#         conv4 = tf.nn.dropout(conv3b, keep_prob)
-#         conv4 = conv2d(conv4, 1024, kernel=3, strides=2, name=dname + 'conv4')
-#         conv4 = batchnorm(conv4, is_training=is_train, name=dname + 'bn4')
-#         conv4 = lrelu(conv4, 0.2)
-#         # 4
-
-#         flat = flatten(conv4)
-#         # Classifier
-#         clspred = linear(flat, n_classes, name=dname + 'cpred')
         self.clspred = nn.Linear(4 * 4 * 1024, nef)
     
         self.decoder = nn.Sequential(
@@ -261,34 +235,7 @@ class STAGE1_D(nn.Module):
             #64
             nn.Tanh()
         )
-#         # Decoder
-#         g1 = conv2d(conv4, nout=512, kernel=3, name=dname + 'deconv1')
-#         g1 = batchnorm(g1, is_training=tf.constant(True), name=dname + 'bn1g')
-#         g1 = lrelu(g1, 0.2)
 
-#         g2 = nnupsampling(g1, [8, 8])
-#         g2 = conv2d(g2, nout=256, kernel=3, name=dname + 'deconv2')
-#         g2 = batchnorm(g2, is_training=tf.constant(True), name=dname + 'bn2g')
-#         g2 = lrelu(g2, 0.2)
-
-#         g3 = nnupsampling(g2, [16, 16])
-#         g3 = conv2d(g3, nout=128, kernel=3, name=dname + 'deconv3')
-#         g3 = batchnorm(g3, is_training=tf.constant(True), name=dname + 'bn3g')
-#         g3 = lrelu(g3, 0.2)
-
-#         g4 = nnupsampling(g3, [32, 32])
-#         g4 = conv2d(g4, nout=64, kernel=3, name=dname + 'deconv4')
-#         g4 = batchnorm(g4, is_training=tf.constant(True), name=dname + 'bn4g')
-#         g4 = lrelu(g4, 0.2)
-
-#         g5 = nnupsampling(g4, [64, 64])
-#         g5 = conv2d(g5, nout=32, kernel=3, name=dname + 'deconv5')
-#         g5 = batchnorm(g5, is_training=tf.constant(True), name=dname + 'bn5g')
-#         g5 = lrelu(g5, 0.2)
-
-#         g5b = conv2d(g5, nout=3, kernel=3, name=dname + 'deconv5b')
-#         g5b = tf.nn.tanh(g5b)
-#         return clspred, g5b
 
     def forward(self, image):
 #         img_embedding = self.encode_img(image)
