@@ -61,30 +61,6 @@ def compute_discriminator_loss(netD, real_imgs, fake_imgs,
     return errD, errD_real.data.item(), errD_wrong.data.item(), errD_fake.data.item()
 
 
-# def compute_generator_loss(netD, fake_imgs, real_labels, conditions, gpus):
-#     criterion = nn.BCELoss()
-#     cond = conditions.detach()
-#     fake_features = nn.parallel.data_parallel(netD, (fake_imgs), gpus)
-#     # fake pairs
-#     inputs = (fake_features, cond)
-#     fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
-#     errD_fake = criterion(fake_logits, real_labels)
-#     if netD.get_uncond_logits is not None:
-#         fake_logits = \
-#             nn.parallel.data_parallel(netD.get_uncond_logits,
-#                                       (fake_features), gpus)
-#         uncond_errD_fake = criterion(fake_logits, real_labels)
-#         errD_fake += uncond_errD_fake
-    
-def compute_generator_loss(real_scores, fake_scores, gen_samples, recon_fake, embeddings):
-    embeddings = embeddings.type(torch.long)
-    labels = torch.argmax(embeddings, dim=1)
-    fake_probs = log_sum_exp(fake_scores)
-    recon_loss = torch.mean(torch.pow(recon_fake - gen_samples, 2.0)) * 0.5
-    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, labels))
-    
-    G_loss = recon_loss + adv_loss
-    return G_loss
 # # Define D loss
 # lreal = log_sum_exp(Opred_n)
 # lfake = log_sum_exp(Opred_g)
@@ -92,8 +68,32 @@ def compute_generator_loss(real_scores, fake_scores, gen_samples, recon_fake, em
 # cost_Dn = - tf.reduce_mean(lreal) + tf.reduce_mean(tf.nn.softplus(lreal))
 # cost_Dg_fake = tf.reduce_mean(tf.nn.softplus(lfake))
 # cost_msen = tf.reduce_mean(tf.square(recon_n - x_n)) * 0.5
-# cost_mseg = tf.reduce_mean(tf.square(recon_g - samples)) * 0.5
 # D_loss = cost_On + cost_Dn + cost_Dg_fake + cost_msen
+
+
+def compute_discriminator_loss(real_imgs, gen_samples, recon_real, fake_logits, real_logits, embeddings):
+    labels = torch.argmax(embeddings, dim=1)
+    fake_probs = log_sum_exp(fake_logits)
+    real_probs = log_sum_exp(real_logits)
+    orig_loss = torch.mean(nn.functional.cross_entropy(real_logits, labels))
+    disc_real_loss = -torch.mean(real_probs) + torch.mean(nn.functional.softplus(real_probs))
+    disc_gen_loss = torch.mean(nn.functional.softplus(fake_probs))
+    recon_loss_real = torch.mean(tf.square(recon_real - real_imgs)) * 0.5
+    D_loss = orig_loss + disc_real_loss + disc_gen_loss + recon_loss_real
+    return D_loss
+    
+def compute_generator_loss(fake_logits, gen_samples, recon_fake, embeddings):
+    embeddings = embeddings.type(torch.long)
+    labels = torch.argmax(embeddings, dim=1)
+    fake_probs = log_sum_exp(fake_logits)
+    recon_loss_fake = torch.mean(torch.pow(recon_fake - gen_samples, 2.0)) * 0.5
+    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, labels))
+    
+    G_loss = recon_loss_fake + adv_loss
+    return G_loss
+
+# cost_mseg = tf.reduce_mean(tf.square(recon_g - samples)) * 0.5
+
 # # Define G loss
 # cost_Dg = - tf.reduce_mean(lfake) + tf.reduce_mean(tf.nn.softplus(lfake))
 # cost_Og = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Opred_g, labels=iny))
@@ -163,3 +163,19 @@ def mkdir_p(path):
 def log_sum_exp(x, axis=1):
     m,_ = torch.max(x, axis, keepdim=True, out=None) 
     return m + torch.log(torch.sum(torch.exp(x - m), dim=axis))
+
+
+# def compute_generator_loss(netD, fake_imgs, real_labels, conditions, gpus):
+#     criterion = nn.BCELoss()
+#     cond = conditions.detach()
+#     fake_features = nn.parallel.data_parallel(netD, (fake_imgs), gpus)
+#     # fake pairs
+#     inputs = (fake_features, cond)
+#     fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
+#     errD_fake = criterion(fake_logits, real_labels)
+#     if netD.get_uncond_logits is not None:
+#         fake_logits = \
+#             nn.parallel.data_parallel(netD.get_uncond_logits,
+#                                       (fake_features), gpus)
+#         uncond_errD_fake = criterion(fake_logits, real_labels)
+#         errD_fake += uncond_errD_fake
