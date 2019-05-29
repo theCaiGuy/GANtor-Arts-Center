@@ -12,12 +12,14 @@ cfg = __C
 # Dataset name: flowers, birds
 __C.DATASET_NAME = 'wikiart'
 __C.CONFIG_NAME = ''
-__C.GPU_ID = '0,1'
+__C.GPU_ID = '0,1,2,3,4,5,6,7'
 __C.CUDA = True
 __C.WORKERS = 4
 
-__C.NET_G = ""#'../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netG_epoch_60.pth' 
-__C.NET_D = ""#'../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netD_epoch_last.pth' 
+__C.NET_G = "../../results/wikiart_stageI_2019_05_29_02_25_47/Model/netG_epoch_60.pth"
+#For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netG_epoch_60.pth' 
+__C.NET_D = "../../results/wikiart_stageI_2019_05_29_02_25_47/Model/netD_epoch_last.pth"
+#For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netD_epoch_last.pth' 
 __C.STAGE1_G = ''
 __C.DATA_DIR = '../../data/'
 __C.VIS_COUNT = 64
@@ -32,6 +34,7 @@ __C.TRAIN = edict()
 __C.TRAIN.FLAG = True
 __C.TRAIN.BATCH_SIZE = 64
 __C.TRAIN.MAX_EPOCH = 600
+_C.TRAIN.EPOCH_INIT = 0
 __C.TRAIN.SNAPSHOT_INTERVAL = 50
 __C.TRAIN.PRETRAINED_MODEL = ''
 __C.TRAIN.PRETRAINED_EPOCH = 600

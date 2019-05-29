@@ -119,7 +119,8 @@ class GANTrainer(object):
         nz = cfg.Z_DIM
         batch_size = self.batch_size
         noise = Variable(torch.FloatTensor(batch_size, nz))
-
+        lr_decay_factor = 0.5
+        
         with torch.no_grad():
             fixed_noise = \
                 Variable(torch.FloatTensor(batch_size, nz).normal_(0, 1))
@@ -147,13 +148,27 @@ class GANTrainer(object):
        
         print("GPUs: " + str(self.gpus))
 
-        for epoch in range(self.max_epoch):
+        epoch_init = cgf.EPOCH_INIT
+        print ("Training from epoch {}".format(epoch_init))
+               
+        #Adjust learning rate for a loaded model
+        if (epoch_init > 0):
+            num_decays = (epoch_init // lr_decay_step) * 1.
+            if epoch % lr_decay_step == 0: num_decays -= 1. #Guaranteed to decay on first step
+            generator_lr = cfg.TRAIN.GENERATOR_LR * (lr_decay_factor**num_decays)
+            discriminator_lr = cfg.TRAIN.DISCRIMINATOR_LR * (lr_decay_factor**num_decays)
+            
+            print("Adjusted G/D learning rates: {}, {}".format(generator_lr, discriminator_lr))
+        else:
+            print("Initial G/D learning rates: {}, {}".format(generator_lr, discriminator_lr))
+            
+        for epoch in range(epoch_init, self.max_epoch):
             start_t = time.time()
             if epoch % lr_decay_step == 0 and epoch > 0:
-                generator_lr *= 0.5
+                generator_lr *= lr_decay_factor
                 for param_group in optimizerG.param_groups:
                     param_group['lr'] = generator_lr
-                discriminator_lr *= 0.5
+                discriminator_lr *= lr_decay_factor
                 for param_group in optimizerD.param_groups:
                     param_group['lr'] = discriminator_lr
 

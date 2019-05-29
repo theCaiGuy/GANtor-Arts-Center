@@ -12,11 +12,7 @@ import torchvision.utils as vutils
 
 
 #############################
-def KL_loss(mu, logvar):
-    # -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
-    KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
-    KLD = torch.mean(KLD_element).mul_(-0.5)
-    return KLD
+
 
 # # Define D loss
 # lreal = log_sum_exp(Opred_n)
@@ -122,6 +118,11 @@ def log_sum_exp(x, axis=1):
     return m + torch.log(torch.sum(torch.exp(x - m), dim=axis))
 
 
+# def KL_loss(mu, logvar):
+#     # -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+#     KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
+#     KLD = torch.mean(KLD_element).mul_(-0.5)
+#     return KLD
 # def compute_generator_loss(netD, fake_imgs, real_labels, conditions, gpus):
 #     criterion = nn.BCELoss()
 #     cond = conditions.detach()
