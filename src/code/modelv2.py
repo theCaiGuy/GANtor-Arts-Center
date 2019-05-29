@@ -17,7 +17,7 @@ def upBlock(in_planes, out_planes):
         nn.Upsample(scale_factor=2, mode='nearest'),
         conv3x3(in_planes, out_planes),
         nn.BatchNorm2d(out_planes),
-        nn.LeakyReLU(0.2)
+        nn.LeakyReLU(0.2))
     return block
 
 
@@ -38,37 +38,6 @@ class ResBlock(nn.Module):
         out += residual
         out = self.relu(out)
         return out
-
-
-# class CA_NET(nn.Module):
-#     # some code is modified from vae examples
-#     # (https://github.com/pytorch/examples/blob/master/vae/main.py)
-#     def __init__(self):
-#         super(CA_NET, self).__init__()
-#         self.t_dim = cfg.TEXT.DIMENSION
-#         self.c_dim = cfg.GAN.CONDITION_DIM
-#         self.fc = nn.Linear(self.t_dim, self.c_dim * 2, bias=True)
-#         self.relu = nn.ReLU()
-
-#     def encode(self, text_embedding):
-#         x = self.relu(self.fc(text_embedding))
-#         mu = x[:, :self.c_dim]
-#         logvar = x[:, self.c_dim:]
-#         return mu, logvar
-
-#     def reparametrize(self, mu, logvar):
-#         std = logvar.mul(0.5).exp_()
-#         if cfg.CUDA:
-#             eps = torch.cuda.FloatTensor(std.size()).normal_()
-#         else:
-#             eps = torch.FloatTensor(std.size()).normal_()
-#         eps = Variable(eps)
-#         return eps.mul(std).add_(mu)
-
-#     def forward(self, text_embedding):
-#         mu, logvar = self.encode(text_embedding)
-#         c_code = self.reparametrize(mu, logvar)
-#         return c_code, mu, logvar
 
 
 class D_GET_LOGITS(nn.Module):
@@ -173,7 +142,6 @@ class STAGE1_D(nn.Module):
         ndf, nef = self.df_dim, self.ef_dim
         self.encoder = nn.Sequential(
             # 64
-#             nn.Conv2d(3, 128, 3, stride=2),
             nn.Conv2d(3, 128, 3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
             # 32
@@ -197,7 +165,6 @@ class STAGE1_D(nn.Module):
             nn.LeakyReLU(0.2)
             # 4
         )
-        # 64
 
         self.clspred = nn.Linear(4 * 4 * 1024, nef)
     
@@ -239,21 +206,21 @@ class STAGE1_D(nn.Module):
 
     def forward(self, image):
 #         img_embedding = self.encode_img(image)
-        print(image.size())
-        print("Encoding")
+#         print(image.size())
+#         print("Encoding")
         img_embedding = self.encoder(gaussnoise(image, 0.05))
-        print("Encoded!")
-        print(img_embedding.size())
-        print(flatten(img_embedding).size())
+#         print("Encoded!")
+#         print(img_embedding.size())
+#         print(flatten(img_embedding).size())
         
         clspred = self.clspred(flatten(img_embedding))
-        print("clspred: " + str(clspred))
+#         print("clspred: " + str(clspred))
         
-        print("Decoding")
+#         print("Decoding")
         decoded_embedding = self.decoder(img_embedding)
-        print("Decoded!")
+#         print("Decoded!")
 
-        print(clspred.size(), decoded_embedding.size())
+#         print(clspred.size(), decoded_embedding.size())
         return clspred, decoded_embedding
 
 
@@ -327,7 +294,6 @@ class STAGE2_G(nn.Module):
         h_code = self.upsample4(h_code)
 
         fake_img = self.img(h_code)
-#         return stage1_img, fake_img, mu, logvar
         return stage1_img, fake_img
 
 
