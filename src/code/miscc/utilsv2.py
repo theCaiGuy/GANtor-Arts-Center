@@ -61,22 +61,50 @@ def compute_discriminator_loss(netD, real_imgs, fake_imgs,
     return errD, errD_real.data.item(), errD_wrong.data.item(), errD_fake.data.item()
 
 
-def compute_generator_loss(netD, fake_imgs, real_labels, conditions, gpus):
-    criterion = nn.BCELoss()
-    cond = conditions.detach()
-    fake_features = nn.parallel.data_parallel(netD, (fake_imgs), gpus)
-    # fake pairs
-    inputs = (fake_features, cond)
-    fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
-    errD_fake = criterion(fake_logits, real_labels)
-    if netD.get_uncond_logits is not None:
-        fake_logits = \
-            nn.parallel.data_parallel(netD.get_uncond_logits,
-                                      (fake_features), gpus)
-        uncond_errD_fake = criterion(fake_logits, real_labels)
-        errD_fake += uncond_errD_fake
-    return errD_fake
+# def compute_generator_loss(netD, fake_imgs, real_labels, conditions, gpus):
+#     criterion = nn.BCELoss()
+#     cond = conditions.detach()
+#     fake_features = nn.parallel.data_parallel(netD, (fake_imgs), gpus)
+#     # fake pairs
+#     inputs = (fake_features, cond)
+#     fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
+#     errD_fake = criterion(fake_logits, real_labels)
+#     if netD.get_uncond_logits is not None:
+#         fake_logits = \
+#             nn.parallel.data_parallel(netD.get_uncond_logits,
+#                                       (fake_features), gpus)
+#         uncond_errD_fake = criterion(fake_logits, real_labels)
+#         errD_fake += uncond_errD_fake
+    
+def compute_generator_loss(real_scores, fake_scores, gen_samples, recon_fake, embeddings):
+    
+    fake_probs = log_sum_exp(fake_scores)
+    recon_loss = torch.mean(torch.pow(recon_fake - gen_samples, 2.0)) * 0.5
+    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, embeddings))
+    
+    G_loss = recon_loss + adv_loss
+    return G_loss
+# # Define D loss
+# lreal = log_sum_exp(Opred_n)
+# lfake = log_sum_exp(Opred_g)
+# cost_On = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Opred_n, labels=y))
+# cost_Dn = - tf.reduce_mean(lreal) + tf.reduce_mean(tf.nn.softplus(lreal))
+# cost_Dg_fake = tf.reduce_mean(tf.nn.softplus(lfake))
+# cost_msen = tf.reduce_mean(tf.square(recon_n - x_n)) * 0.5
+# cost_mseg = tf.reduce_mean(tf.square(recon_g - samples)) * 0.5
+# D_loss = cost_On + cost_Dn + cost_Dg_fake + cost_msen
+# # Define G loss
+# cost_Dg = - tf.reduce_mean(lfake) + tf.reduce_mean(tf.nn.softplus(lfake))
+# cost_Og = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Opred_g, labels=iny))
+# G_loss = cost_Dg + cost_Og + cost_mseg
 
+# # Define optimizer
+# d_optimizer = tf.train.AdamOptimizer(learning_rate=lr_tf, beta1=0.5).minimize(D_loss, var_list=d_vars)
+# g_optimizer = tf.train.AdamOptimizer(learning_rate=lr_tf, beta1=0.5).minimize(G_loss, var_list=g_vars)
+
+# # Evaluate model
+# Oaccuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(Opred_n, 1), tf.argmax(y, 1)), tf.float32))
+# #    
 
 #############################
 def weights_init(m):
@@ -130,3 +158,7 @@ def mkdir_p(path):
             pass
         else:
             raise
+            
+def log_sum_exp(x, axis=1):
+    m = torch.max(x, axis, keepdim=True, out=None) 
+    return m + torch.log(torch.sum(torch.exp(x - m), axis=axis))
