@@ -185,43 +185,36 @@ class GANTrainer(object):
                 # Run discriminator on real and fake images to generate real and fake classpreds and reconstructions
                 clspred_real, recon_real =\
                     nn.parallel.data_parallel(netD, (real_imgs), self.gpus)
-#                 print("clspred_real shape: " + str(clspred_real.size()))
-#                 print("recond_real shape: " + str(recon_real.size()))
                 clspred_fake, recon_fake =\
                     nn.parallel.data_parallel(netD, (fake_imgs), self.gpus)
-#                 print("clspred_fake shape: " + str(clspred_fake.size()))
-#                 print("recon_fake shape: " + str(recon_fake.size()))
                
-#                 errD, errD_real, errD_wrong, errD_fake =\
-#                     compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, txt_embedding, self.gpus)
+                errD = compute_discriminator_loss(real_imgs, fake_imgs, recon_real, clspred_fake, clspred_real, txt_embedding)
 
-#                 errD.backward()
-#                 optimizerD.step()
+                errD.backward()
+                optimizerD.step()
+                
                 ############################
                 # (2) Update G network
                 ###########################
                 netG.zero_grad()
 
-                errG = compute_generator_loss(clspred_real, clspred_fake, fake_imgs, recon_fake, txt_embedding)
-                print(errG)
+                errG = compute_generator_loss(clspred_fake, fake_imgs, recon_fake, txt_embedding)
                 errG.backward()
                 optimizerG.step()
 
                 count = count + 1
-                if i % 20 == 0:
-                    # save the image result for each epoch
+                if i % 10 == 0:
                     print ('Epoch: ' + str(epoch) + ' iteration: ' + str(i), flush=True)
                     print ('D_loss: ' + str(errD.data.item()), flush=True)
                     print ('G_loss: ' + str(errG.data.item()), flush=True)
                     
             end_t = time.time()
-            print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f
-                     Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
+            print('''[%d/%d] Loss_D: %.4f Loss_G: %.4f
                      Total Time: %.2fsec
                   '''
-                  % (epoch, self.max_epoch, i, len(data_loader),
+                  % (epoch, self.max_epoch,
                      errD.data.item(), errG.data.item(),
-                     errD_real, errD_wrong, errD_fake, (end_t - start_t)))
+                     (end_t - start_t)))
             
             inputs = (txt_embedding, fixed_noise)
             lr_fake, fake = \
@@ -234,10 +227,9 @@ class GANTrainer(object):
                 
             if epoch % self.snapshot_interval == 0:
                 save_model(netG, netD, epoch, self.model_dir)
-        #
+                
         save_model(netG, netD, self.max_epoch, self.model_dir)
-        #
-        self.summary_writer.close()
+        
 
     def sample(self, datapath, stage=1):
         if stage == 1:
