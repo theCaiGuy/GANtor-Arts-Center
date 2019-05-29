@@ -189,8 +189,9 @@ class GANTrainer(object):
                     nn.parallel.data_parallel(netD, (fake_imgs), self.gpus)
                
                 errD = compute_discriminator_loss(real_imgs, fake_imgs, recon_real, clspred_fake, clspred_real, txt_embedding)
-
-                errD.backward()
+                
+#                 print(errD, errD.size())
+                errD.backward(retain_graph=True)
                 optimizerD.step()
                 
                 ############################
@@ -199,14 +200,17 @@ class GANTrainer(object):
                 netG.zero_grad()
 
                 errG = compute_generator_loss(clspred_fake, fake_imgs, recon_fake, txt_embedding)
+#                 print(errG, errG.size())
                 errG.backward()
-                optimizerG.step()
+                optimizerG.step()           
 
                 count = count + 1
                 if i % 10 == 0:
                     print ('Epoch: ' + str(epoch) + ' iteration: ' + str(i), flush=True)
                     print ('D_loss: ' + str(errD.data.item()), flush=True)
                     print ('G_loss: ' + str(errG.data.item()), flush=True)
+                    accuracy = np.mean(torch.argmax(clspred_real, 1).cpu().numpy() == torch.argmax(txt_embedding, 1).cpu().numpy())
+                    print('Discriminator accuracy: {}'.format(accuracy))
                     
             end_t = time.time()
             print('''[%d/%d] Loss_D: %.4f Loss_G: %.4f

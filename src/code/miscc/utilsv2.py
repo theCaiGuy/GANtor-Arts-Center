@@ -18,49 +18,6 @@ def KL_loss(mu, logvar):
     KLD = torch.mean(KLD_element).mul_(-0.5)
     return KLD
 
-
-def compute_discriminator_loss(netD, real_imgs, fake_imgs,
-                               real_labels, fake_labels,
-                               conditions, gpus):
-    criterion = nn.BCELoss()
-    batch_size = real_imgs.size(0)
-    cond = conditions.detach()
-    fake = fake_imgs.detach()
-    real_features = nn.parallel.data_parallel(netD, (real_imgs), gpus)
-    fake_features = nn.parallel.data_parallel(netD, (fake), gpus)
-    # real pairs
-    inputs = (real_features, cond)
-    real_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
-    errD_real = criterion(real_logits, real_labels)
-    # wrong pairs
-    inputs = (real_features[:(batch_size-1)], cond[1:])
-    wrong_logits = \
-        nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
-    errD_wrong = criterion(wrong_logits, fake_labels[1:])
-    # fake pairs
-    inputs = (fake_features, cond)
-    fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
-    errD_fake = criterion(fake_logits, fake_labels)
-
-    if netD.get_uncond_logits is not None:
-        real_logits = \
-            nn.parallel.data_parallel(netD.get_uncond_logits,
-                                      (real_features), gpus)
-        fake_logits = \
-            nn.parallel.data_parallel(netD.get_uncond_logits,
-                                      (fake_features), gpus)
-        uncond_errD_real = criterion(real_logits, real_labels)
-        uncond_errD_fake = criterion(fake_logits, fake_labels)
-        #
-        errD = ((errD_real + uncond_errD_real) / 2. +
-                (errD_fake + errD_wrong + uncond_errD_fake) / 3.)
-        errD_real = (errD_real + uncond_errD_real) / 2.
-        errD_fake = (errD_fake + uncond_errD_fake) / 2.
-    else:
-        errD = errD_real + (errD_fake + errD_wrong) * 0.5
-    return errD, errD_real.data.item(), errD_wrong.data.item(), errD_fake.data.item()
-
-
 # # Define D loss
 # lreal = log_sum_exp(Opred_n)
 # lfake = log_sum_exp(Opred_g)
@@ -78,7 +35,7 @@ def compute_discriminator_loss(real_imgs, gen_samples, recon_real, fake_logits, 
     orig_loss = torch.mean(nn.functional.cross_entropy(real_logits, labels))
     disc_real_loss = -torch.mean(real_probs) + torch.mean(nn.functional.softplus(real_probs))
     disc_gen_loss = torch.mean(nn.functional.softplus(fake_probs))
-    recon_loss_real = torch.mean(tf.square(recon_real - real_imgs)) * 0.5
+    recon_loss_real = torch.mean(torch.pow(recon_real - real_imgs, 2.0)) * 0.5
     D_loss = orig_loss + disc_real_loss + disc_gen_loss + recon_loss_real
     return D_loss
     
@@ -87,7 +44,7 @@ def compute_generator_loss(fake_logits, gen_samples, recon_fake, embeddings):
     labels = torch.argmax(embeddings, dim=1)
     fake_probs = log_sum_exp(fake_logits)
     recon_loss_fake = torch.mean(torch.pow(recon_fake - gen_samples, 2.0)) * 0.5
-    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, labels))
+    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_logits, labels))
     
     G_loss = recon_loss_fake + adv_loss
     return G_loss
@@ -179,3 +136,44 @@ def log_sum_exp(x, axis=1):
 #                                       (fake_features), gpus)
 #         uncond_errD_fake = criterion(fake_logits, real_labels)
 #         errD_fake += uncond_errD_fake
+
+# def compute_discriminator_loss(netD, real_imgs, fake_imgs,
+#                                real_labels, fake_labels,
+#                                conditions, gpus):
+#     criterion = nn.BCELoss()
+#     batch_size = real_imgs.size(0)
+#     cond = conditions.detach()
+#     fake = fake_imgs.detach()
+#     real_features = nn.parallel.data_parallel(netD, (real_imgs), gpus)
+#     fake_features = nn.parallel.data_parallel(netD, (fake), gpus)
+#     # real pairs
+#     inputs = (real_features, cond)
+#     real_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
+#     errD_real = criterion(real_logits, real_labels)
+#     # wrong pairs
+#     inputs = (real_features[:(batch_size-1)], cond[1:])
+#     wrong_logits = \
+#         nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
+#     errD_wrong = criterion(wrong_logits, fake_labels[1:])
+#     # fake pairs
+#     inputs = (fake_features, cond)
+#     fake_logits = nn.parallel.data_parallel(netD.get_cond_logits, inputs, gpus)
+#     errD_fake = criterion(fake_logits, fake_labels)
+
+#     if netD.get_uncond_logits is not None:
+#         real_logits = \
+#             nn.parallel.data_parallel(netD.get_uncond_logits,
+#                                       (real_features), gpus)
+#         fake_logits = \
+#             nn.parallel.data_parallel(netD.get_uncond_logits,
+#                                       (fake_features), gpus)
+#         uncond_errD_real = criterion(real_logits, real_labels)
+#         uncond_errD_fake = criterion(fake_logits, fake_labels)
+#         #
+#         errD = ((errD_real + uncond_errD_real) / 2. +
+#                 (errD_fake + errD_wrong + uncond_errD_fake) / 3.)
+#         errD_real = (errD_real + uncond_errD_real) / 2.
+#         errD_fake = (errD_fake + uncond_errD_fake) / 2.
+#     else:
+#         errD = errD_real + (errD_fake + errD_wrong) * 0.5
+#     return errD, errD_real.data.item(), errD_wrong.data.item(), errD_fake.data.item()
