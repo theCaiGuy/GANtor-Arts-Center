@@ -91,7 +91,7 @@ class STAGE1_G(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(ninput, ngf * 4 * 4, bias=False),
             nn.BatchNorm1d(ngf * 4 * 4),
-            nn.ReLU(True))
+            nn.LeakyReLU(0.2))
 
         # ngf x 4 x 4 -> ngf/2 x 8 x 8
         self.upsample1 = upBlock(ngf, ngf // 2)

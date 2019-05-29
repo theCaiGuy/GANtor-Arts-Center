@@ -192,19 +192,19 @@ class GANTrainer(object):
 #                 print("clspred_fake shape: " + str(clspred_fake.size()))
 #                 print("recon_fake shape: " + str(recon_fake.size()))
                
-                errD, errD_real, errD_wrong, errD_fake =\
-                    compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, txt_embedding, self.gpus)
+#                 errD, errD_real, errD_wrong, errD_fake =\
+#                     compute_discriminator_loss(netD, real_imgs, fake_imgs, real_labels, fake_labels, txt_embedding, self.gpus)
 
-                errD.backward()
-                optimizerD.step()
+#                 errD.backward()
+#                 optimizerD.step()
                 ############################
                 # (2) Update G network
                 ###########################
                 netG.zero_grad()
 
                 errG = compute_generator_loss(clspred_real, clspred_fake, fake_imgs, recon_fake, txt_embedding)
-                errG_total = errG
-                errG_total.backward()
+                print(errG)
+                errG.backward()
                 optimizerG.step()
 
                 count = count + 1

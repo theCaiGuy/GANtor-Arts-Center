@@ -77,10 +77,11 @@ def compute_discriminator_loss(netD, real_imgs, fake_imgs,
 #         errD_fake += uncond_errD_fake
     
 def compute_generator_loss(real_scores, fake_scores, gen_samples, recon_fake, embeddings):
-    
+    embeddings = embeddings.type(torch.long)
+    labels = torch.argmax(embeddings, dim=1)
     fake_probs = log_sum_exp(fake_scores)
     recon_loss = torch.mean(torch.pow(recon_fake - gen_samples, 2.0)) * 0.5
-    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, embeddings))
+    adv_loss = - torch.mean(fake_probs) + torch.mean(nn.functional.softplus(fake_probs)) + torch.mean(nn.functional.cross_entropy(fake_scores, labels))
     
     G_loss = recon_loss + adv_loss
     return G_loss
@@ -160,5 +161,5 @@ def mkdir_p(path):
             raise
             
 def log_sum_exp(x, axis=1):
-    m = torch.max(x, axis, keepdim=True, out=None) 
-    return m + torch.log(torch.sum(torch.exp(x - m), axis=axis))
+    m,_ = torch.max(x, axis, keepdim=True, out=None) 
+    return m + torch.log(torch.sum(torch.exp(x - m), dim=axis))
