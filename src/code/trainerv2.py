@@ -161,8 +161,9 @@ class GANTrainer(object):
             print("Adjusted G/D learning rates: {}, {}".format(generator_lr, discriminator_lr))
         else:
             print("Initial G/D learning rates: {}, {}".format(generator_lr, discriminator_lr))
-            
-        for epoch in range(epoch_init, self.max_epoch):
+           
+        g_losses, d_losses, d_accs = [], [], []
+        for epoch in range(epoch_init, self.max_epoch + 1):
             start_t = time.time()
             if epoch % lr_decay_step == 0 and epoch > 0:
                 generator_lr *= lr_decay_factor
@@ -233,6 +234,9 @@ class GANTrainer(object):
                     print ('G_loss: ' + str(errG.data.item()), flush=True)
                     accuracy = np.mean(torch.argmax(clspred_real, 1).cpu().numpy() == torch.argmax(txt_embedding, 1).cpu().numpy())
                     print('Discriminator accuracy: {}'.format(accuracy))
+                    g_losses.append(errG)
+                    d_losses.append(errD)
+                    d_accs.append(accuracy)
                     
             end_t = time.time()
             print('''[%d/%d] Loss_D: %.4f Loss_G: %.4f
@@ -253,7 +257,10 @@ class GANTrainer(object):
                 
             if epoch % self.snapshot_interval == 0:
                 save_model(netG, netD, epoch, self.model_dir)
-                
+        
+        g_losses = np.save("../../results/G_losses.npy", np.array(g_losses))
+        d_losses = np.save("../../results/D_losses.npy", np.array(d_losses))
+        d_accs = np.save("../../results/D_accs.npy", np.array(d_accs))
         save_model(netG, netD, self.max_epoch, self.model_dir)
         
 

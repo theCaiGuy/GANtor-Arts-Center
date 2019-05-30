@@ -16,9 +16,12 @@ __C.GPU_ID = '0,1,2,3,4,5,6,7'
 __C.CUDA = True
 __C.WORKERS = 4
 
-__C.NET_G = "../../results/wikiart_stageI_2019_05_29_02_25_47/Model/netG_epoch_60.pth"
+# __C.NET_G = "../../results/wikiart_stageI_2019_05_29_16_16_57/Model/netG_epoch_90.pth"
+#Comment out path if pre-trained nets not being loaded
+__C.NET_G = ""
+__C.NET_D = ""
 #For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netG_epoch_60.pth' 
-__C.NET_D = "../../results/wikiart_stageI_2019_05_29_02_25_47/Model/netD_epoch_last.pth"
+# __C.NET_D = "../../results/wikiart_stageI_2019_05_29_16_16_57/Model/netD_epoch_last.pth"
 #For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netD_epoch_last.pth' 
 __C.STAGE1_G = ''
 __C.DATA_DIR = '../../data/'

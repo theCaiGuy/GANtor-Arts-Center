@@ -377,20 +377,20 @@ class STAGE2_D(nn.Module):
 
     def forward(self, image):
         print(image.size())
-        print("Encoding")
+#         print("Encoding")
         img_embedding = self.encoder(gaussnoise(image, 0.05))
-        print("Encoded!")
-        print(img_embedding.size())
-        print(flatten(img_embedding).size())
+#         print("Encoded!")
+#         print(img_embedding.size())
+#         print(flatten(img_embedding).size())
         
         clspred = self.clspred(flatten(img_embedding))
-        print("clspred: " + str(clspred))
+# #         print("clspred: " + str(clspred))
         
-        print("Decoding")
+#         print("Decoding")
         decoded_embedding = self.decoder(img_embedding)
-        print("Decoded!")
+#         print("Decoded!")
 
-        print(clspred.size(), decoded_embedding.size())
+#         print(clspred.size(), decoded_embedding.size())
         return clspred, decoded_embedding
 
 
