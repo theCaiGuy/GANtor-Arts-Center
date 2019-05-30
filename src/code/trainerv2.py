@@ -148,13 +148,13 @@ class GANTrainer(object):
        
         print("GPUs: " + str(self.gpus))
 
-        epoch_init = cgf.EPOCH_INIT
+        epoch_init = cfg.TRAIN.EPOCH_INIT
         print ("Training from epoch {}".format(epoch_init))
                
         #Adjust learning rate for a loaded model
         if (epoch_init > 0):
             num_decays = (epoch_init // lr_decay_step) * 1.
-            if epoch % lr_decay_step == 0: num_decays -= 1. #Guaranteed to decay on first step
+            if epoch_init % lr_decay_step == 0: num_decays -= 1. #Guaranteed to decay on first step
             generator_lr = cfg.TRAIN.GENERATOR_LR * (lr_decay_factor**num_decays)
             discriminator_lr = cfg.TRAIN.DISCRIMINATOR_LR * (lr_decay_factor**num_decays)
             
