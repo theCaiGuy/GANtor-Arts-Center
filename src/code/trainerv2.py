@@ -191,7 +191,14 @@ class GANTrainer(object):
                 inputs = (txt_embedding, noise)
                 _, fake_imgs = \
                     nn.parallel.data_parallel(netG, inputs, self.gpus)
-
+                
+                if stage == 2:
+                    fake_imgs = nn.functional.avg_pool2d(fake_imgs, 2)
+                    real_imgs = nn.functional.avg_pool2d(real_imgs, 2)
+                    
+                #real_imgs and fake_imgs should be (64x64) if stage 1, (128x128) if stage 2
+                # Note: Model saves non-downsampled (256x256) fakes at test time
+                
                 ############################
                 # (3) Update D network
                 ###########################

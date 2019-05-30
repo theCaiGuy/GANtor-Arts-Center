@@ -3,7 +3,7 @@ CONFIG_NAME: 'stageII'
 DATASET_NAME: 'wikiart'
 GPU_ID: '0,1,2,3,4,5,6,7'
 Z_DIM: 100
-STAGE1_G: '../../results/wikiart_stageI_2019_05_27_07_46_53/Model/netG_epoch_10.pth'
+STAGE1_G: '../../results/wikiart_stageI_2019_05_29_16_16_57/Model/netG_epoch_10.pth'
 DATA_DIR: '../../data/'
 WORKERS: 8
 IMSIZE: 256
