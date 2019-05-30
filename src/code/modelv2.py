@@ -250,17 +250,17 @@ class STAGE2_G(nn.Module):
         # --> 4ngf x 16 x 16
         self.encoder = nn.Sequential(
             conv3x3(3, ngf),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2),
             nn.Conv2d(ngf, ngf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 2),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2),
             nn.Conv2d(ngf * 2, ngf * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 4),
-            nn.ReLU(True))
+            nn.LeakyReLU(0.2))
         self.hr_joint = nn.Sequential(
             conv3x3(self.ef_dim + ngf * 4, ngf * 4),
             nn.BatchNorm2d(ngf * 4),
-            nn.ReLU(True))
+            nn.LeakyReLU(0.2))
         self.residual = self._make_layer(ResBlock, ngf * 4)
         # --> 2ngf x 32 x 32
         self.upsample1 = upBlock(ngf * 4, ngf * 2)
@@ -306,36 +306,126 @@ class STAGE2_D(nn.Module):
 
     def define_module(self):
         ndf, nef = self.df_dim, self.ef_dim
-        self.encode_img = nn.Sequential(
-            nn.Conv2d(3, ndf, 4, 2, 1, bias=False),  # 128 * 128 * ndf
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 2),
-            nn.LeakyReLU(0.2, inplace=True),  # 64 * 64 * ndf * 2
-            nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(0.2, inplace=True),  # 32 * 32 * ndf * 4
-            nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True),  # 16 * 16 * ndf * 8
-            nn.Conv2d(ndf * 8, ndf * 16, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True),  # 8 * 8 * ndf * 16
-            nn.Conv2d(ndf * 16, ndf * 32, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 32),
-            nn.LeakyReLU(0.2, inplace=True),  # 4 * 4 * ndf * 32
-            conv3x3(ndf * 32, ndf * 16),
-            nn.BatchNorm2d(ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True),   # 4 * 4 * ndf * 16
-            conv3x3(ndf * 16, ndf * 8),
-            nn.BatchNorm2d(ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True)   # 4 * 4 * ndf * 8
+        self.encoder = nn.Sequential(
+            # 128
+            nn.Conv2d(3, 64, 3, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
+            # 64
+            nn.Dropout(p = 0.5),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2),
+            # 32
+            nn.Dropout(p = 0.5),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
+            # 16
+            nn.Dropout(p = 0.5),
+            nn.Conv2d(256, 512, 3, stride=2, padding=1),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            # 8
+            nn.Conv2d(512, 512, 3, stride=1),
+            # 6
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.5),
+            nn.Conv2d(512, 1024, 3, stride=1),
+            nn.BatchNorm2d(1024),
+            nn.LeakyReLU(0.2),
+            # 4
         )
 
-        self.get_cond_logits = D_GET_LOGITS(ndf, nef, bcondition=True)
-        self.get_uncond_logits = D_GET_LOGITS(ndf, nef, bcondition=False)
+        self.clspred = nn.Linear(4 * 4 * 1024, nef)
+    
+        self.decoder = nn.Sequential(
+            nn.Conv2d(1024, 512, 3, padding=1),
+            
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 8x8
+            nn.Conv2d(512, 256, 3, padding=1),
+            
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 16x16
+            nn.Conv2d(256, 128, 3, padding=1),
+            
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 32x32
+            nn.Conv2d(128, 64, 3, padding=1),
+            
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 64x64
+            nn.Conv2d(64, 32, 3, padding=1),
+            
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(0.2),
+            nn.Upsample(scale_factor=2, mode='nearest'), # 128x128
+            nn.Conv2d(32, 16, 3, padding=1),
+            
+            nn.BatchNorm2d(16),
+            nn.LeakyReLU(0.2),
+            
+            nn.Conv2d(16, 3, 3, padding=1),
+            nn.Tanh()
+        )
+
 
     def forward(self, image):
-        img_embedding = self.encode_img(image)
+        print(image.size())
+        print("Encoding")
+        img_embedding = self.encoder(gaussnoise(image, 0.05))
+        print("Encoded!")
+        print(img_embedding.size())
+        print(flatten(img_embedding).size())
+        
+        clspred = self.clspred(flatten(img_embedding))
+        print("clspred: " + str(clspred))
+        
+        print("Decoding")
+        decoded_embedding = self.decoder(img_embedding)
+        print("Decoded!")
 
-        return img_embedding
+        print(clspred.size(), decoded_embedding.size())
+        return clspred, decoded_embedding
+
+
+
+#         ndf, nef = self.df_dim, self.ef_dim
+#         self.encode_img = nn.Sequential(
+#             nn.Conv2d(3, ndf, 4, 2, 1, bias=False),  # 128 * 128 * ndf
+#             nn.LeakyReLU(0.2, inplace=True),
+#             nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
+#             nn.BatchNorm2d(ndf * 2),
+#             nn.LeakyReLU(0.2, inplace=True),  # 64 * 64 * ndf * 2
+#             nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
+#             nn.BatchNorm2d(ndf * 4),
+#             nn.LeakyReLU(0.2, inplace=True),  # 32 * 32 * ndf * 4
+#             nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
+#             nn.BatchNorm2d(ndf * 8),
+#             nn.LeakyReLU(0.2, inplace=True),  # 16 * 16 * ndf * 8
+#             nn.Conv2d(ndf * 8, ndf * 16, 4, 2, 1, bias=False),
+#             nn.BatchNorm2d(ndf * 16),
+#             nn.LeakyReLU(0.2, inplace=True),  # 8 * 8 * ndf * 16
+#             nn.Conv2d(ndf * 16, ndf * 32, 4, 2, 1, bias=False),
+#             nn.BatchNorm2d(ndf * 32),
+#             nn.LeakyReLU(0.2, inplace=True),  # 4 * 4 * ndf * 32
+#             conv3x3(ndf * 32, ndf * 16),
+#             nn.BatchNorm2d(ndf * 16),
+#             nn.LeakyReLU(0.2, inplace=True),   # 4 * 4 * ndf * 16
+#             conv3x3(ndf * 16, ndf * 8),
+#             nn.BatchNorm2d(ndf * 8),
+#             nn.LeakyReLU(0.2, inplace=True)   # 4 * 4 * ndf * 8
+#         )
+
+#         self.get_cond_logits = D_GET_LOGITS(ndf, nef, bcondition=True)
+#         self.get_uncond_logits = D_GET_LOGITS(ndf, nef, bcondition=False)
+
+#     def forward(self, image):
+#         img_embedding = self.encode_img(image)
+
+#         return img_embedding
