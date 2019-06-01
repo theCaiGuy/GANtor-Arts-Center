@@ -234,8 +234,8 @@ class GANTrainer(object):
                     print ('G_loss: ' + str(errG.data.item()), flush=True)
                     accuracy = np.mean(torch.argmax(clspred_real, 1).cpu().numpy() == torch.argmax(txt_embedding, 1).cpu().numpy())
                     print('Discriminator accuracy: {}'.format(accuracy))
-                    g_losses.append(errG)
-                    d_losses.append(errD)
+                    g_losses.append(errG.data.item())
+                    d_losses.append(errD.data.item())
                     d_accs.append(accuracy)
                     
             end_t = time.time()

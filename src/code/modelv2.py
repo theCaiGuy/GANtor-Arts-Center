@@ -376,7 +376,7 @@ class STAGE2_D(nn.Module):
 
 
     def forward(self, image):
-        print(image.size())
+#         print(image.size())
 #         print("Encoding")
         img_embedding = self.encoder(gaussnoise(image, 0.05))
 #         print("Encoded!")
