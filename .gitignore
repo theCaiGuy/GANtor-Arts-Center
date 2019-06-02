@@ -7,3 +7,5 @@ results/
 src/code/inception/ft_wikiart/
 src/code/inception/baseline_generated/
 __pycache__/
+src/code/fid/Generated_Images/*
+src/code/fid/Sorted_Images/*
