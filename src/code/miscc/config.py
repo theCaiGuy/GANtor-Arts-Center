@@ -18,8 +18,8 @@ __C.WORKERS = 4
 
 # __C.NET_G = "../../results/wikiart_stageI_2019_05_29_16_16_57/Model/netG_epoch_90.pth"
 #Comment out path if pre-trained nets not being loaded
-__C.NET_G = ""
-__C.NET_D = ""
+__C.NET_G = "../saved_models/netG_epoch_60.pth"
+__C.NET_D = "../saved_models/netD_epoch_last.pth"
 #For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netG_epoch_60.pth' 
 # __C.NET_D = "../../results/wikiart_stageI_2019_05_29_16_16_57/Model/netD_epoch_last.pth"
 #For v1: '../../results/wikiart_stageI_2019_05_27_03_50_34/Model/netD_epoch_last.pth' 
