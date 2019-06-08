@@ -1,0 +1,2 @@
+Warning: number of images is not a multiple of the batch size. Some samples are going to be ignored.
+FID:  106.04420994784846
