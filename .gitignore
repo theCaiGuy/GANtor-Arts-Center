@@ -9,3 +9,4 @@ src/code/inception/baseline_generated/
 __pycache__/
 src/code/fid/Generated_Images/*
 src/code/fid/Sorted_Images/*
+src/code/fid/ft_genre_15eps.pth
