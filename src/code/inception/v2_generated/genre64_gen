@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {0..9..1}
+	do 
+		mkdir genre64/$i
+	done
