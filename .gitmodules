@@ -1,0 +1,6 @@
+[submodule "vendor/plugins/open_flash_chart_2"]
+	path = vendor/plugins/open_flash_chart_2
+	url = git://github.com/korin/open_flash_chart_2_plugin.git
+[submodule "src/code/fid/pytorch-fid"]
+	path = src/code/fid/pytorch-fid
+	url = git://github.com/thecaiguy/pytorch-fid.git

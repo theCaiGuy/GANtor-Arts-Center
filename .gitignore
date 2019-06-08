@@ -10,3 +10,4 @@ __pycache__/
 src/code/fid/Generated_Images/*
 src/code/fid/Sorted_Images/*
 src/code/fid/ft_genre_15eps.pth
+src/code/fid/Final_Images/*
