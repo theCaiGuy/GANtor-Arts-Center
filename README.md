@@ -33,4 +33,4 @@ Steps to set up project:
 
 5. To modify the v2 code (the most recent version), edit the .py files in GANtor-Arts-Center/src/code/ that are suffixed "v2".
 
-Contact co-author at avoy.datta@stanford.edu for further queries.
+Contact authors at {avoy.datta, mcai88}@stanford.edu for further queries.
