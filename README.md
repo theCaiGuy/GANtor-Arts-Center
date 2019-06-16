@@ -1,5 +1,9 @@
 # GANtor-Arts-Center
 
+The "GANtor Arts Center" paper can be found in the "cs231n_submissions" folder. Also available in the same folder is a presentation poster summarizing our work.
+
+Authors: Avoy Datta (BSc. Stanford EE, 2020) and Michael Cai (BSc. Stanford CS, 2020). 
+
 Major dependencies:
 1. CUDA-compatible GPUs for training
 2. pytorch version: 1.0.1.post2
